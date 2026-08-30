@@ -2,8 +2,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { vaultImages } from "@/lib/data";
 
-export default function BrowsePage() {
-  const pageImages = vaultImages.slice(0, 6);
+export default async function BrowsePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const pageParam = typeof params.page === 'string' ? params.page : '1';
+  let currentPage = parseInt(pageParam, 10);
+  
+  const totalFrames = vaultImages.length;
+  const framesPerPage = 6;
+  const totalPages = Math.ceil(totalFrames / framesPerPage);
+
+  // Keep page within bounds
+  if (isNaN(currentPage) || currentPage < 1) currentPage = 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const startIndex = (currentPage - 1) * framesPerPage;
+  const endIndex = Math.min(startIndex + framesPerPage, totalFrames);
+  const pageImages = vaultImages.slice(startIndex, endIndex);
+
+  // Formatting helpers
+  const formatNum = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div className="h-screen w-full bg-bg-primary font-mono selection:bg-text-primary selection:text-bg-primary flex justify-center overflow-hidden">
@@ -13,8 +34,8 @@ export default function BrowsePage() {
         
         {/* Top Bar */}
         <header className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em]">
-          <p>FIG. 01&ndash;06 &middot; PAGE 01</p>
-          <p>30 FRAMES TOTAL</p>
+          <p>FIG. {formatNum(startIndex + 1)}&ndash;{formatNum(endIndex)} &middot; PAGE {formatNum(currentPage)}</p>
+          <p>{totalFrames} FRAMES TOTAL</p>
         </header>
 
         {/* Main Grid — 3 columns x 2 rows */}
@@ -40,6 +61,7 @@ export default function BrowsePage() {
               
               <div className="text-xs text-text-muted uppercase tracking-[0.2em] flex justify-between items-center group-hover:text-text-primary transition-colors duration-300 shrink-0">
                 <p>Fig: {image.id}</p>
+                <p>{image.addedAt}</p>
               </div>
             </div>
           ))}
@@ -55,17 +77,31 @@ export default function BrowsePage() {
           </div>
 
           <div className="flex items-center gap-6 sm:gap-10">
-            <span className="opacity-40 cursor-not-allowed flex items-center gap-2">
-              <span>&larr;</span> PREV
-            </span>
-            <span className="text-text-primary font-medium">PAGE 01 / 05</span>
-            <Link href="/browse" className="hover:text-text-primary transition-colors flex items-center gap-2">
-              NEXT <span>&rarr;</span>
-            </Link>
+            {currentPage > 1 ? (
+              <Link href={`/browse?page=${currentPage - 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2">
+                <span>&larr;</span> PREV
+              </Link>
+            ) : (
+              <span className="opacity-40 cursor-not-allowed flex items-center gap-2">
+                <span>&larr;</span> PREV
+              </span>
+            )}
+            
+            <span className="text-text-primary font-medium">PAGE {formatNum(currentPage)} / {formatNum(totalPages)}</span>
+            
+            {currentPage < totalPages ? (
+              <Link href={`/browse?page=${currentPage + 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2">
+                NEXT <span>&rarr;</span>
+              </Link>
+            ) : (
+              <span className="opacity-40 cursor-not-allowed flex items-center gap-2">
+                NEXT <span>&rarr;</span>
+              </span>
+            )}
           </div>
 
           <div className="flex-1 justify-end hidden sm:flex">
-            <span>30 FRAMES</span>
+            <span>{totalFrames} FRAMES</span>
           </div>
 
         </footer>
