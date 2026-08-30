@@ -28,10 +28,10 @@ export default async function BrowsePage({
   const formatNum = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <div className="h-screen w-full bg-bg-primary font-mono selection:bg-text-primary selection:text-bg-primary flex justify-center overflow-hidden">
+    <div className="min-h-screen md:h-screen w-full bg-bg-primary font-mono selection:bg-text-primary selection:text-bg-primary flex justify-center md:overflow-hidden">
       
       {/* Central Structural Container */}
-      <div className="w-full max-w-350 h-full border-x border-border flex flex-col overflow-hidden">
+      <div className="w-full max-w-350 min-h-screen md:h-full border-x border-border flex flex-col md:overflow-hidden">
         
         {/* Top Bar */}
         <header className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em]">
@@ -44,10 +44,11 @@ export default async function BrowsePage({
           {pageImages.map((image, i) => (
             <div 
               key={image.id} 
-              className={`border-b border-border p-4 sm:p-6 md:p-8 flex flex-col relative group min-h-0 overflow-hidden
+              className={`border-border p-4 sm:p-6 md:p-8 flex flex-col relative group min-h-87.5 sm:min-h-112.5 md:min-h-0 md:overflow-hidden
+                ${i === pageImages.length - 1 ? "border-b-0" : "border-b"}
+                ${i >= 3 ? "md:border-b-0" : "md:border-b"}
                 md:border-r 
-                ${(i + 1) % 3 === 0 ? "md:border-r-0" : ""}
-                ${i < 3 ? "md:border-b" : "md:border-b-0"}`}
+                ${(i + 1) % 3 === 0 ? "md:border-r-0" : ""}`}
             >
               <div className="flex-1 min-h-0 relative w-full mb-3">
                 <Image 
