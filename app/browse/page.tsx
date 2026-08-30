@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { vaultImages } from "@/lib/data";
 
 export default async function BrowsePage({
@@ -71,31 +72,31 @@ export default async function BrowsePage({
         <footer className="h-16 sm:h-20 border-t border-border flex flex-col sm:flex-row items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em] bg-bg-primary gap-2 sm:gap-0">
           
           <div className="flex-1 flex justify-start">
-            <Link href="/" className="hover:text-text-primary transition-colors flex items-center gap-2">
-              <span>&larr;</span> BACK TO HOME
+            <Link href="/" className="hover:text-text-primary transition-colors flex items-center gap-2 group">
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:-translate-x-1" /> BACK TO HOME
             </Link>
           </div>
 
           <div className="flex items-center gap-6 sm:gap-10">
             {currentPage > 1 ? (
-              <Link href={`/browse?page=${currentPage - 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2">
-                <span>&larr;</span> PREV
+              <Link href={`/browse?page=${currentPage - 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2 group">
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:-translate-x-1" /> PREV
               </Link>
             ) : (
               <span className="opacity-40 cursor-not-allowed flex items-center gap-2">
-                <span>&larr;</span> PREV
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> PREV
               </span>
             )}
             
             <span className="text-text-primary font-medium">PAGE {formatNum(currentPage)} / {formatNum(totalPages)}</span>
             
             {currentPage < totalPages ? (
-              <Link href={`/browse?page=${currentPage + 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2">
-                NEXT <span>&rarr;</span>
+              <Link href={`/browse?page=${currentPage + 1}`} className="hover:text-text-primary transition-colors flex items-center gap-2 group">
+                NEXT <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             ) : (
               <span className="opacity-40 cursor-not-allowed flex items-center gap-2">
-                NEXT <span>&rarr;</span>
+                NEXT <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </span>
             )}
           </div>
