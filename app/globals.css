@@ -1,26 +1,138 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════
+   THE VAULT DESIGN SYSTEM — Style Tokens
+   Victor Mono · Dark surface ladder · No shadows
+   ══════════════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Typography — Victor Mono exclusively */
+  --font-display: var(--font-victor-mono);
+  --font-body: var(--font-victor-mono);
+  --font-mono: var(--font-victor-mono);
+
+  /* ── Surfaces ── */
+  --color-bg-primary: #111113;        /* base background — not near-black */
+  --color-bg-secondary: #16171a;      /* hero panel / section backgrounds */
+  --color-bg-card: #111113;           /* flush cards */
+  --color-surface-elevated: #1a1b1e;  /* modal/lightbox background */
+  --color-surface-card: #1e1f22;      /* grid cell hover state */
+
+  /* ── Text ── */
+  --color-text-primary: #f2f2f4;      /* headline, primary content */
+  --color-text-secondary: #9a9a9c;    /* subhead lines, captions */
+  --color-text-muted: #6a6a6c;        /* FIG. 0X labels, metadata, pagination */
+
+  /* ── Borders ── */
+  --color-border: #262729;            /* standard hairline — grid cells, cards */
+  --color-border-strong: rgba(255, 255, 255, 0.14); /* hover/active border emphasis */
+  --color-border-soft: rgba(255, 255, 255, 0.07);   /* subtle dividers */
+
+  /* ── Interactive ── */
+  --color-hover-bg: rgba(255, 255, 255, 0.04);
+  --color-btn-bg: rgba(255, 255, 255, 0.08);
+  --color-btn-text: #f2f2f4;
+
+  /* ── Accent — kept minimal, used sparingly ── */
+  --color-accent: #8a8d91;            /* near-neutral, almost grayscale — CTA border/text only */
+
+  /* ── Modal / Lightbox overlay ── */
+  --color-modal-overlay: rgba(8, 8, 9, 0.92);  /* backdrop behind lightbox */
 }
 
+/* ── Tailwind v4 Theme Bridge ── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-primary: var(--color-bg-primary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-bg-card: var(--color-bg-card);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-card: var(--color-surface-card);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-soft: var(--color-border-soft);
+  --color-hover-bg: var(--color-hover-bg);
+  --color-btn-bg: var(--color-btn-bg);
+  --color-btn-text: var(--color-btn-text);
+  --color-accent: var(--color-accent);
+  --color-modal-overlay: var(--color-modal-overlay);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ══════════════════════════════════════════════
+   BASE STYLES
+   ══════════════════════════════════════════════ */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   TYPOGRAPHY
+   ══════════════════════════════════════════════ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* ══════════════════════════════════════════════
+   INTERACTIONS
+   ══════════════════════════════════════════════ */
+
+button,
+a {
+  transition: all 0.15s ease;
+  transition-property: background-color, border-color, color, transform, opacity;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ══════════════════════════════════════════════
+   SELECTION
+   ══════════════════════════════════════════════ */
+
+::selection {
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+}
+
+/* ══════════════════════════════════════════════
+   SCROLLBAR — minimal, theme-consistent
+   ══════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #232425;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #434345;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #232425 transparent;
 }
