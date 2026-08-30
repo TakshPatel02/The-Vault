@@ -1,69 +1,86 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="h-screen w-full bg-bg-primary font-mono selection:bg-text-primary selection:text-bg-primary overflow-hidden flex justify-center">
+      
+      {/* Central Structural Container (Matches portfolio max-width grid) */}
+      <div className="w-full max-w-350 h-full border-x border-border flex flex-col">
+        
+        {/* Row 1: Header / Label */}
+        <header className="h-24 sm:h-32 border-b border-border flex items-end px-6 sm:px-12 md:px-16 pb-6 sm:pb-8 shrink-0">
+          <p className="text-text-muted text-xs sm:text-sm tracking-[0.25em] uppercase">
+            FIG. 00 &middot; PERSONAL ARCHIVE
           </p>
+        </header>
+
+        {/* Row 2: Massive Hero Typography */}
+        <div className="flex-1 border-b border-border flex flex-col justify-center px-6 sm:px-12 md:px-16 relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,var(--color-bg-secondary),transparent_50%)]">
+          <h1 className="text-[12vw] lg:text-[11rem] leading-[0.85] text-text-primary font-display font-medium tracking-tighter uppercase">
+            THE VAULT
+          </h1>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Row 3: Context & CTA Grid */}
+        <div className="h-auto md:h-64 flex flex-col md:flex-row shrink-0 border-b border-border">
+          
+          {/* Left Block: The Context Lines */}
+          <div className="flex-1 border-b md:border-b-0 md:border-r border-border p-6 sm:p-12 md:p-16 flex flex-col justify-center bg-bg-primary">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 text-text-secondary text-sm leading-relaxed max-w-5xl">
+              <p>
+                Images that almost became<br />
+                the portfolio hero.
+              </p>
+              <p>
+                None of them made the final cut.<br />
+                All of them were good enough to keep.
+              </p>
+              <p>
+                Still growing &mdash;<br />
+                new frames added whenever one earns a place here.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Block: Massive CTA Button */}
+          <Link 
+            href="/browse" 
+            className="w-full md:w-100 h-48 md:h-full p-6 sm:p-12 md:p-16 flex flex-col justify-end bg-bg-secondary/30 hover:bg-bg-secondary transition-all duration-300 group relative ring-1 ring-inset ring-transparent hover:ring-border-strong"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div>
+              <p className="text-text-muted text-xs uppercase tracking-[0.15em] mb-3">
+                30 frames &middot; just to look
+              </p>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <p className="text-xl sm:text-2xl text-text-primary font-medium tracking-tight uppercase group-hover:text-white transition-colors duration-300">
+                  ENTER THE VAULT
+                </p>
+                <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 text-text-primary group-hover:text-white transition-all duration-300 group-hover:translate-x-2" />
+              </div>
+            </div>
+          </Link>
+          
         </div>
-      </main>
+
+        {/* Row 4: One-Time Footer */}
+        <footer className="h-16 sm:h-20 flex flex-col sm:flex-row items-start sm:items-center justify-center sm:justify-between px-6 sm:px-12 md:px-16 text-xs sm:text-sm text-text-muted bg-bg-primary shrink-0">
+          <p className="tracking-wide">Rejected by the hero section. Approved by me.</p>
+          <p className="tracking-wide mt-1 sm:mt-0">
+            Taksh Patel &middot;{" "}
+            <a 
+              href="https://takshpatel.vercel.app" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-text-primary hover:text-white transition-colors inline-flex items-center gap-1 group underline decoration-border-strong underline-offset-4 hover:decoration-text-muted"
+            >
+              Portfolio 
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:-translate-y-px group-hover:translate-x-px" />
+            </a>
+          </p>
+        </footer>
+
+      </div>
     </div>
   );
 }
