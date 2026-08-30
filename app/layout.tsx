@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Victor_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const victorMono = Victor_Mono({
   weight: ["400","500","600"],
@@ -23,7 +24,10 @@ export default function RootLayout({
       lang="en"
       className={`${victorMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
