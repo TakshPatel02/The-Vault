@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { VaultImage } from "@/components/VaultImage";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { vaultImages } from "@/lib/data";
 
@@ -51,12 +51,9 @@ export default async function BrowsePage({
                 ${(i + 1) % 3 === 0 ? "md:border-r-0" : ""}`}
             >
               <div className="flex-1 min-h-0 relative w-full mb-3">
-                <Image 
+                <VaultImage 
                   src={image.src} 
                   alt={image.alt} 
-                  fill 
-                  className="object-contain" 
-                  sizes="(max-width: 768px) 100vw, 33vw"
                   priority
                 />
               </div>
