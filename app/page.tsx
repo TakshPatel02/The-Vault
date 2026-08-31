@@ -16,7 +16,7 @@ export default function Home() {
         </header>
 
         {/* Row 2: Massive Hero Typography */}
-        <div className="flex-1 border-b border-border flex flex-col justify-center px-6 sm:px-12 md:px-16 relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,var(--color-bg-secondary),transparent_50%)]">
+        <div className="flex-1 border-b border-border flex flex-col justify-center px-6 sm:px-12 md:px-16 relative overflow-hidden">
           <h1 className="text-[12vw] lg:text-[11rem] leading-[0.85] text-text-primary font-display font-medium tracking-tighter uppercase">
             THE VAULT
           </h1>
@@ -46,7 +46,7 @@ export default function Home() {
           {/* Right Block: Massive CTA Button */}
           <Link 
             href="/browse" 
-            className="w-full md:w-100 h-48 md:h-full p-6 sm:p-12 md:p-16 flex flex-col justify-end bg-bg-secondary/30 hover:bg-bg-secondary transition-all duration-300 group relative ring-1 ring-inset ring-transparent hover:ring-border-strong"
+            className="w-full md:w-100 h-48 md:h-full p-6 sm:p-12 md:p-16 flex flex-col justify-end bg-bg-secondary/30 transition-all duration-300 group relative ring-1 ring-inset ring-transparent hover:ring-border-strong"
           >
             <div>
               <p className="text-text-muted text-xs uppercase tracking-[0.15em] mb-3">
