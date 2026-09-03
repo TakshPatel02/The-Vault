@@ -36,4 +36,6 @@ export const vaultImages: VaultImage[] = [
   { id: "028", src: "/images/image-28.jpg", alt: "Vault archive frame 028", addedAt: "2026-08-30" },
   { id: "029", src: "/images/image-29.jpg", alt: "Vault archive frame 029", addedAt: "2026-08-30" },
   { id: "030", src: "/images/image-30.jpg", alt: "Vault archive frame 030", addedAt: "2026-08-30" },
+  { id: "031", src: "/images/image-31.jpg", alt: "Vault archive frame 031", addedAt: "2026-09-01" },
+  { id: "032", src: "/images/image-32.jpg", alt: "Vault archive frame 032", addedAt: "2026-09-01" },
 ];
