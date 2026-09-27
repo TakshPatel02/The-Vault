@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { VaultImage } from "@/components/VaultImage";
+import { AnimatedGridCell, AnimatedBar } from "@/components/AnimatedGrid";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { vaultImages } from "@/lib/data";
 
@@ -34,16 +35,17 @@ export default async function BrowsePage({
       <div className="w-full max-w-350 min-h-screen md:h-full border-x border-border flex flex-col md:overflow-hidden">
         
         {/* Top Bar */}
-        <header className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em]">
+        <AnimatedBar direction="down" className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em]">
           <p>FIG. {formatNum(startIndex + 1)}&ndash;{formatNum(endIndex)} &middot; PAGE {formatNum(currentPage)}</p>
           <p>{totalFrames} FRAMES TOTAL</p>
-        </header>
+        </AnimatedBar>
 
         {/* Main Grid — 3 columns x 2 rows */}
         <main className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 md:grid-rows-2">
           {pageImages.map((image, i) => (
-            <div 
-              key={image.id} 
+            <AnimatedGridCell
+              key={image.id}
+              index={i}
               className={`border-border p-4 sm:p-6 md:p-8 flex flex-col relative group min-h-87.5 sm:min-h-112.5 md:min-h-0 md:overflow-hidden
                 ${i === pageImages.length - 1 ? "border-b-0" : "border-b"}
                 ${i >= 3 ? "md:border-b-0" : "md:border-b"}
@@ -55,6 +57,7 @@ export default async function BrowsePage({
                   src={image.src} 
                   alt={image.alt} 
                   priority
+                  index={i}
                 />
               </div>
               
@@ -62,12 +65,12 @@ export default async function BrowsePage({
                 <p>Fig: {image.id}</p>
                 <p>{image.addedAt}</p>
               </div>
-            </div>
+            </AnimatedGridCell>
           ))}
         </main>
 
         {/* Bottom Bar */}
-        <footer className="h-16 sm:h-20 border-t border-border flex flex-col sm:flex-row items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em] bg-bg-primary gap-2 sm:gap-0">
+        <AnimatedBar direction="up" className="h-16 sm:h-20 border-t border-border flex flex-col sm:flex-row items-center justify-between px-6 sm:px-12 md:px-16 shrink-0 text-xs sm:text-sm text-text-muted uppercase tracking-[0.15em] bg-bg-primary gap-2 sm:gap-0">
           
           <div className="flex-1 flex justify-start">
             <Link href="/" className="hover:text-text-primary transition-colors flex items-center gap-2 group">
@@ -103,7 +106,7 @@ export default async function BrowsePage({
             <span>{totalFrames} FRAMES</span>
           </div>
 
-        </footer>
+        </AnimatedBar>
 
       </div>
     </div>
