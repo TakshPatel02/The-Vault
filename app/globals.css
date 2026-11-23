@@ -2,42 +2,48 @@
 
 /* ══════════════════════════════════════════════
    THE VAULT DESIGN SYSTEM — Style Tokens
-   Victor Mono · Dark surface ladder · No shadows
+   Warm light surface ladder · Soft depth
    ══════════════════════════════════════════════ */
 
 :root {
-  /* Typography — Victor Mono exclusively */
-  --font-display: var(--font-victor-mono);
-  --font-body: var(--font-victor-mono);
-  --font-mono: var(--font-victor-mono);
+  /* Typography */
+  --font-display: var(--font-geist-sans);
+  --font-body: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 
   /* ── Surfaces ── */
-  --color-bg-primary: #111113;        /* base background — not near-black */
-  --color-bg-secondary: #16171a;      /* hero panel / section backgrounds */
-  --color-bg-card: #111113;           /* flush cards */
-  --color-surface-elevated: #1a1b1e;  /* modal/lightbox background */
-  --color-surface-card: #1e1f22;      /* grid cell hover state */
+  --color-bg-primary: #f4f2ee;        /* warm off-white base */
+  --color-bg-secondary: #efede8;      /* hero panel / section backgrounds */
+  --color-bg-card: #f4f2ee;           /* flush cards */
+  --color-surface-elevated: #faf9f6;  /* modal/lightbox background */
+  --color-surface-card: #ece9e3;      /* grid cell hover state */
 
   /* ── Text ── */
-  --color-text-primary: #f2f2f4;      /* headline, primary content */
-  --color-text-secondary: #9a9a9c;    /* subhead lines, captions */
-  --color-text-muted: #6a6a6c;        /* FIG. 0X labels, metadata, pagination */
+  --color-text-primary: #111111;      /* headline, primary content */
+  --color-text-secondary: #6b6b6b;    /* subhead lines, captions */
+  --color-text-muted: #77736d;        /* FIG. 0X labels, metadata, pagination */
 
   /* ── Borders ── */
-  --color-border: #262729;            /* standard hairline — grid cells, cards */
-  --color-border-strong: rgba(255, 255, 255, 0.14); /* hover/active border emphasis */
-  --color-border-soft: rgba(255, 255, 255, 0.07);   /* subtle dividers */
+  --color-border: #d8d4cd;            /* standard hairline — grid cells, cards */
+  --color-border-strong: rgba(17, 17, 17, 0.16); /* hover/active border emphasis */
+  --color-border-soft: rgba(17, 17, 17, 0.08);   /* subtle dividers */
 
   /* ── Interactive ── */
-  --color-hover-bg: rgba(255, 255, 255, 0.04);
-  --color-btn-bg: rgba(255, 255, 255, 0.08);
-  --color-btn-text: #f2f2f4;
+  --color-hover-bg: rgba(17, 17, 17, 0.04);
+  --color-btn-bg: rgba(17, 17, 17, 0.07);
+  --color-btn-text: #111111;
 
   /* ── Accent — kept minimal, used sparingly ── */
-  --color-accent: #8a8d91;            /* near-neutral, almost grayscale — CTA border/text only */
+  --color-accent: #77736d;            /* near-neutral, almost grayscale — CTA border/text only */
 
   /* ── Modal / Lightbox overlay ── */
-  --color-modal-overlay: rgba(8, 8, 9, 0.92);  /* backdrop behind lightbox */
+  --color-modal-overlay: rgba(244, 242, 238, 0.94); /* warm, translucent backdrop */
+
+  /* ── Light-depth effects ── */
+  --shadow-card: 0 30px 60px rgba(17, 17, 17, 0.15);
+  --shadow-card-soft: 0 18px 40px rgba(17, 17, 17, 0.10);
+  --color-ring-fade: var(--color-bg-primary);
+  --color-headline-backdrop: rgba(244, 242, 238, 0.72);
 }
 
 /* ── Tailwind v4 Theme Bridge ── */
@@ -58,6 +64,10 @@
   --color-btn-text: var(--color-btn-text);
   --color-accent: var(--color-accent);
   --color-modal-overlay: var(--color-modal-overlay);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-soft: var(--shadow-card-soft);
+  --color-ring-fade: var(--color-ring-fade);
+  --color-headline-backdrop: var(--color-headline-backdrop);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
@@ -111,6 +121,11 @@ button:active {
   color: var(--color-bg-primary);
 }
 
+/* Keep explicit light-theme utilities from drifting toward pure white. */
+.text-white {
+  color: var(--color-text-primary);
+}
+
 /* ══════════════════════════════════════════════
    SCROLLBAR — minimal, theme-consistent
    ══════════════════════════════════════════════ */
@@ -123,16 +138,16 @@ button:active {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #232425;
+  background: #bbb7af;
   border-radius: 100px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #434345;
+  background: #9d9991;
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: #232425 transparent;
+  scrollbar-color: #bbb7af transparent;
 }
