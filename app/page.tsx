@@ -22,7 +22,7 @@ export default function Home() {
 
       <HaloCardCarousel images={vaultImages} onFirstDrag={handleFirstDrag} />
 
-      <section className="pointer-events-none absolute inset-0 z-99900 flex items-center justify-center px-6 text-center">
+      <section className="pointer-events-none absolute inset-0 z-99900 flex items-center justify-center px-6 text-center -translate-y-8 md:-translate-y-10">
         <div className="w-full px-4 py-6">
           <h1
             className="vault-hero-line font-display text-[clamp(48px,5.5vw,84px)] font-medium leading-none tracking-[-0.03em] text-text-primary"
