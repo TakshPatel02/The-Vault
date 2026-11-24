@@ -43,6 +43,12 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       turn: 0,
       userTurn: 0,
       velocity: 0,
+      pointerX: 0.5,
+      pointerY: 0.5,
+      pointerXT: 0.5,
+      pointerYT: 0.5,
+      hover: 0,
+      hoverT: 0,
       dragging: false,
       lastX: 0,
       lastTime: 0,
@@ -63,6 +69,19 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       state.lastTime = performance.now();
       state.velocity = 0;
       root.setPointerCapture?.(event.pointerId);
+    };
+
+    const onHover = (event: PointerEvent) => {
+      state.hoverT = 1;
+      const rect = root.getBoundingClientRect();
+      state.pointerXT = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      state.pointerYT = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    };
+
+    const onLeave = () => {
+      state.hoverT = 0;
+      state.pointerXT = 0.5;
+      state.pointerYT = 0.5;
     };
 
     const onMove = (event: PointerEvent) => {
@@ -92,6 +111,8 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
     };
 
     root.addEventListener("pointerdown", onDown);
+    root.addEventListener("pointermove", onHover);
+    root.addEventListener("pointerleave", onLeave);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
@@ -109,6 +130,10 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       const dt = lastTime < 0 ? 0 : Math.min(1 / 20, Math.max(0, (now - lastTime) / 1000));
       lastTime = now;
 
+      state.pointerX += (state.pointerXT - state.pointerX) * (1 - Math.exp(-dt * 6));
+      state.pointerY += (state.pointerYT - state.pointerY) * (1 - Math.exp(-dt * 6));
+      state.hover += (state.hoverT - state.hover) * (1 - Math.exp(-dt * 4));
+
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reducedMotion) {
         state.turn = (state.turn + 8 * DEG * dt) % TAU;
@@ -120,7 +145,8 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
         state.velocity *= damping;
       }
 
-      const tilt = 28 * DEG;
+      const hoverLean = state.hover * 0.9;
+      const tilt = (30 + (state.pointerY - 0.5) * 12 * hoverLean) * DEG;
       const roll = -12 * DEG;
       const cosPitch = Math.cos(tilt);
       const sinPitch = Math.sin(tilt);
@@ -131,7 +157,8 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       const radius = 285;
       const centerX = state.width / 2;
       const centerY = state.height * 0.42;
-      const phi = state.turn + state.userTurn;
+      const phi = state.turn + state.userTurn +
+        (state.pointerX - 0.5) * 12 * DEG * hoverLean;
       const pitchBase = 22 * DEG;
       const sinPitchBase = Math.sin(pitchBase);
       const cosPitchBase = Math.cos(pitchBase);
@@ -189,6 +216,8 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       observer?.disconnect();
       resizeObserver.disconnect();
       root.removeEventListener("pointerdown", onDown);
+      root.removeEventListener("pointermove", onHover);
+      root.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
