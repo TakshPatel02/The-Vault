@@ -120,6 +120,12 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
     let frameId = 0;
     let lastTime = -1;
     let visible = true;
+    const entryDelay = 0;
+    const entryDuration = 2400;
+    const startAngle = -220 * DEG;
+    let entryStart = 0;
+    let idleSpeed = 0;
+    const targetIdleSpeed = 8 * DEG;
 
     const frame = (now: number) => {
       if (!visible) {
@@ -129,14 +135,24 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
 
       const dt = lastTime < 0 ? 0 : Math.min(1 / 20, Math.max(0, (now - lastTime) / 1000));
       lastTime = now;
+      if (!entryStart) entryStart = now;
+      const entryElapsed = now - entryStart - entryDelay;
+      const entryProgress = Math.min(1, Math.max(0, entryElapsed / entryDuration));
+      const entryEase = 1 - Math.pow(1 - entryProgress, 4);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const entering = !reducedMotion && entryProgress < 1;
+      const entryAngle = entering ? startAngle * (1 - entryEase) : 0;
+      const radiusScale = entering ? 1.4 - 0.4 * entryEase : 1;
 
       state.pointerX += (state.pointerXT - state.pointerX) * (1 - Math.exp(-dt * 6));
       state.pointerY += (state.pointerYT - state.pointerY) * (1 - Math.exp(-dt * 6));
       state.hover += (state.hoverT - state.hover) * (1 - Math.exp(-dt * 4));
 
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!reducedMotion) {
-        state.turn = (state.turn + 8 * DEG * dt) % TAU;
+      if (reducedMotion) {
+        idleSpeed = 0;
+      } else {
+        idleSpeed += (targetIdleSpeed - idleSpeed) * Math.min(1, dt * 3);
+        state.turn = (state.turn + idleSpeed * dt) % TAU;
       }
 
       const damping = Math.exp(-dt * (0.5 + 50 / 12));
@@ -157,7 +173,7 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       const radius = 285;
       const centerX = state.width / 2;
       const centerY = state.height * 0.42;
-      const phi = state.turn + state.userTurn +
+      const phi = entryAngle + state.turn + state.userTurn +
         (state.pointerX - 0.5) * 12 * DEG * hoverLean;
       const pitchBase = 22 * DEG;
       const sinPitchBase = Math.sin(pitchBase);
@@ -173,7 +189,7 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
         if (card) {
           const [heightJitter, , radiusJitter] = seededJitter(index);
           const theta = phi + (TAU * index) / images.length;
-          const ringRadius = radius * (1 + (radiusJitter * 6) / 100);
+          const ringRadius = radius * radiusScale * (1 + (radiusJitter * 6) / 100);
           const x0 = ringRadius * Math.sin(theta);
           const z0 = ringRadius * Math.cos(theta);
           const y0 = heightJitter * 12;
@@ -182,7 +198,16 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
           const x = centerX + (x0 * cosRoll - y1 * sinRoll) * unit;
           const y = centerY + (x0 * sinRoll + y1 * cosRoll) * unit;
           const z = z1 * unit;
-          const scale = unit;
+          let entryScale = 1;
+          let entryOpacity = 1;
+          if (!reducedMotion) {
+            const cardTime = now - entryStart - entryDelay - index * 120;
+            const cardProgress = Math.min(1, Math.max(0, cardTime / 900));
+            const cardEase = 1 - Math.pow(1 - cardProgress, 4);
+            entryScale = 0.6 + 0.4 * cardEase;
+            entryOpacity = cardEase;
+          }
+          const scale = unit * entryScale;
           const yaw = 18 * Math.sin(theta);
 
           card.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) translate(-50%, -50%) rotateY(${yaw.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
@@ -191,7 +216,7 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
             (y0 * cosPitchBase + z0 * sinPitchBase) * Math.cos(-12 * DEG);
           card.style.zIndex = String(100000 + Math.round(yRing * 10));
           const backDepth = Math.min(1, Math.max(0, (-z1 + radius) / (radius * 2)));
-          card.style.opacity = (1 - backDepth * 0.35).toFixed(3);
+          card.style.opacity = ((1 - backDepth * 0.35) * entryOpacity).toFixed(3);
           card.style.filter = `blur(${(backDepth * 1.5).toFixed(2)}px)`;
         }
       });
