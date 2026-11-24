@@ -9,6 +9,7 @@ export interface HaloCarouselImage {
 
 interface HaloCardCarouselProps {
   images: HaloCarouselImage[];
+  onFirstDrag?: () => void;
 }
 
 const TAU = Math.PI * 2;
@@ -26,10 +27,11 @@ function seededJitter(index: number) {
   return [random(), random(), random()];
 }
 
-export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
+export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const hasReportedDrag = useRef(false);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -41,12 +43,6 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
       turn: 0,
       userTurn: 0,
       velocity: 0,
-      pointerX: 0.5,
-      pointerY: 0.5,
-      pointerXT: 0.5,
-      pointerYT: 0.5,
-      hover: 0,
-      hoverT: 0,
       dragging: false,
       lastX: 0,
       lastTime: 0,
@@ -69,21 +65,12 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
       root.setPointerCapture?.(event.pointerId);
     };
 
-    const onHover = (event: PointerEvent) => {
-      state.hoverT = 1;
-      const rect = root.getBoundingClientRect();
-      state.pointerXT = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-      state.pointerYT = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
-    };
-
-    const onLeave = () => {
-      state.hoverT = 0;
-      state.pointerXT = 0.5;
-      state.pointerYT = 0.5;
-    };
-
     const onMove = (event: PointerEvent) => {
       if (!state.dragging) return;
+      if (!hasReportedDrag.current) {
+        hasReportedDrag.current = true;
+        onFirstDrag?.();
+      }
 
       const now = performance.now();
       const dx = event.clientX - state.lastX;
@@ -105,8 +92,6 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
     };
 
     root.addEventListener("pointerdown", onDown);
-    root.addEventListener("pointermove", onHover);
-    root.addEventListener("pointerleave", onLeave);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
@@ -124,10 +109,6 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
       const dt = lastTime < 0 ? 0 : Math.min(1 / 20, Math.max(0, (now - lastTime) / 1000));
       lastTime = now;
 
-      state.pointerX += (state.pointerXT - state.pointerX) * (1 - Math.exp(-dt * 6));
-      state.pointerY += (state.pointerYT - state.pointerY) * (1 - Math.exp(-dt * 6));
-      state.hover += (state.hoverT - state.hover) * (1 - Math.exp(-dt * 4));
-
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reducedMotion) {
         state.turn = (state.turn + 8 * DEG * dt) % TAU;
@@ -139,8 +120,7 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
         state.velocity *= damping;
       }
 
-      const hoverLean = state.hover * 0.9;
-      const tilt = (28 + (state.pointerY - 0.5) * 12 * hoverLean) * DEG;
+      const tilt = 28 * DEG;
       const roll = -12 * DEG;
       const cosPitch = Math.cos(tilt);
       const sinPitch = Math.sin(tilt);
@@ -151,7 +131,7 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
       const radius = 285;
       const centerX = state.width / 2;
       const centerY = state.height * 0.42;
-      const phi = state.turn + state.userTurn + (state.pointerX - 0.5) * 12 * DEG * hoverLean;
+      const phi = state.turn + state.userTurn;
       const pitchBase = 22 * DEG;
       const sinPitchBase = Math.sin(pitchBase);
       const cosPitchBase = Math.cos(pitchBase);
@@ -183,10 +163,9 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
           const yRing = x0 * Math.sin(-12 * DEG) +
             (y0 * cosPitchBase + z0 * sinPitchBase) * Math.cos(-12 * DEG);
           card.style.zIndex = String(100000 + Math.round(yRing * 10));
-
-          const normalizedDepth = Math.min(1, Math.max(0, (-z1 + radius) / (radius * 2)));
-          card.style.opacity = (0.58 + (1 - normalizedDepth) * 0.42).toFixed(3);
-          card.style.filter = `blur(${(normalizedDepth * 0.9).toFixed(2)}px)`;
+          const backDepth = Math.min(1, Math.max(0, (-z1 + radius) / (radius * 2)));
+          card.style.opacity = (1 - backDepth * 0.35).toFixed(3);
+          card.style.filter = `blur(${(backDepth * 1.5).toFixed(2)}px)`;
         }
       });
 
@@ -210,13 +189,11 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
       observer?.disconnect();
       resizeObserver.disconnect();
       root.removeEventListener("pointerdown", onDown);
-      root.removeEventListener("pointermove", onHover);
-      root.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [images]);
+  }, [images, onFirstDrag]);
 
   return (
     <div
@@ -234,6 +211,7 @@ export function HaloCardCarousel({ images }: HaloCardCarouselProps) {
             className="absolute left-0 top-0 aspect-video w-40 overflow-hidden rounded-xs bg-bg-secondary"
             style={{
               transform: "translate3d(-9999px, -9999px, 0)",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.12)",
               willChange: "transform, opacity, filter",
             }}
           >
