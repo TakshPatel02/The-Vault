@@ -97,13 +97,10 @@ export function VaultFooter() {
     cardTimers.current.push(timer);
   };
 
-  // Desktop-only mouse move trail
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+  // Desktop-only mouse move trail (scoped strictly to the lower wordmark area)
+  const handleWordmarkMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (window.innerWidth < 640) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const lowerAreaStart = bounds.top + bounds.height * 0.4;
-    if (event.clientY < lowerAreaStart) return;
     const now = performance.now();
     if (now - lastTrailTime.current < 150) return;
 
@@ -153,49 +150,33 @@ export function VaultFooter() {
     trailIndex.current += count;
   };
 
-  // Desktop: clicking wordmark cascades cards above letters
-  const handleDesktopWordmarkClick = () => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    letterRefs.current.forEach((letter, index) => {
-      if (!letter) return;
-      const timer = window.setTimeout(() => {
-        const bounds = letter.getBoundingClientRect();
-        addCard(bounds.left + bounds.width / 2 - 70, bounds.top - 20);
-      }, index * 60);
-      cardTimers.current.push(timer);
-    });
-  };
-
   const handleLetterClick = (index: number) => {
     if (window.innerWidth < 640) {
       triggerMobileTrackFlow(index);
-    } else {
-      handleDesktopWordmarkClick();
     }
   };
 
   return (
     <footer
       ref={footerRef}
-      onMouseMove={handleMouseMove}
       className="relative min-h-[85svh] overflow-hidden border-t border-[#d8d4cd] bg-[linear-gradient(0deg,#d9e1e4_0%,#edf0ef_52%,#f4f2ee_100%)] text-text-primary sm:min-h-[90svh]"
     >
       {/* ── Link area ── */}
       <div className="mx-auto max-w-350 px-6 pb-6 pt-12 sm:pb-10 sm:pt-16 lg:px-12 lg:pt-20">
-        {/* Tagline + live time + back to ring */}
-        <div className="mb-9 flex flex-col gap-6 sm:mb-12 sm:flex-row sm:items-end sm:justify-between lg:mb-14">
-          <p className="max-w-56 font-display text-[26px] font-medium leading-[1.05] tracking-[-0.03em] sm:text-[28px]">
+        {/* Tagline + live time + back to ring — top-aligned on sm+ */}
+        <div className="mb-9 flex flex-col gap-6 sm:mb-12 sm:flex-row sm:items-start sm:justify-between lg:mb-14">
+          <p className="max-w-56 font-display text-[26px] font-medium leading-[1.1] tracking-[-0.03em] sm:text-[28px]">
             Made slowly,
             <br />
             in Ahmedabad.
           </p>
 
-          <div className="flex flex-col gap-1 sm:items-end">
-            <p className="font-mono text-[13px] text-[#77736d]">{time}</p>
+          <div className="flex flex-col sm:items-end">
+            <p className="font-mono text-[13px] leading-[1.1] text-[#77736d]">{time}</p>
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="group inline-flex min-h-11 items-center gap-2 font-mono text-[13px] text-[#111113] transition-opacity hover:opacity-60"
+              className="group mt-1 inline-flex min-h-11 items-center gap-2 font-mono text-[13px] text-[#111113] transition-opacity hover:opacity-60"
             >
               <span aria-hidden="true" className="transition-transform group-hover:-translate-y-1">↑</span>
               Back to the ring
@@ -228,9 +209,13 @@ export function VaultFooter() {
         </div>
       </div>
 
-      {/* ── Wordmark area ── */}
+      {/* ── Wordmark area (only area where desktop trail triggers) ── */}
       <div
         ref={wordmarkAreaRef}
+        onMouseMove={handleWordmarkMouseMove}
+        onMouseLeave={() => {
+          lastTrailPosition.current = null;
+        }}
         className="relative h-[36svh] min-h-48 overflow-hidden sm:h-[50svh] sm:min-h-72"
       >
         <motion.p
@@ -304,7 +289,7 @@ export function VaultFooter() {
               }}
               role="button"
               tabIndex={0}
-              className="inline-block cursor-pointer transition-transform duration-150 active:scale-95"
+              className="inline-block cursor-pointer transition-transform duration-150 active:scale-95 sm:cursor-default sm:active:scale-100"
             >
               {letter === " " ? "\u00A0" : letter}
             </span>
