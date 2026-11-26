@@ -23,7 +23,7 @@ export function VaultHero() {
   const counter = `${String(activeIndex + 1).padStart(2, "0")} / ${String(vaultImages.length).padStart(2, "0")}`;
 
   return (
-    <main className="relative flex h-[86svh] w-full flex-col justify-center overflow-hidden bg-bg-primary pb-14 text-text-primary sm:block sm:h-svh sm:pb-0">
+    <main className="relative flex h-[90svh] w-full flex-col justify-center overflow-hidden bg-bg-primary pb-20 text-text-primary sm:block sm:h-svh sm:pb-0">
       {/* ── Brand mark ── */}
       <header className="absolute left-5 top-5 z-400000 sm:left-10 sm:top-8 md:left-12 md:top-10">
         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-text-primary sm:text-xs md:text-sm">
@@ -73,8 +73,15 @@ export function VaultHero() {
         {currentImage.label} &middot; {counter}
       </p>
 
+      {/* ── Mobile static quote ── */}
+      <p className="mx-auto mt-11 px-4 text-center font-display text-[clamp(15px,4.2vw,18px)] leading-normal text-[#7c7872] sm:hidden">
+        <span className="whitespace-nowrap">&ldquo;I don&apos;t save them because they&apos;re pretty.</span>
+        <br />
+        I save them because I felt something in the first second.&rdquo;
+      </p>
+
       {/* ── Interaction hint & mobile scroll cue ── */}
-      <div className="pointer-events-none absolute bottom-4 left-1/2 z-400000 flex -translate-x-1/2 flex-col items-center gap-2 sm:bottom-8">
+      <div className="pointer-events-none absolute bottom-3 left-1/2 z-400000 flex -translate-x-1/2 flex-col items-center gap-1.5 sm:bottom-8">
         <div
           className={`transition-all duration-500 ease-out ${
             hasDragged ? "max-h-0 translate-y-2 overflow-hidden opacity-0" : "max-h-12 translate-y-0 opacity-100"
