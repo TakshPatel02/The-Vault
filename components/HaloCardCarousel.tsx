@@ -179,7 +179,7 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       if (mob) {
         // ── MOBILE: Sweeping 3D curved horizontal arc in the lower half ──
         // Avoids cramped circular ring & keeps upper 40% completely clear for headline.
-        const activeCount = Math.min(images.length, 7);
+        const activeCount = Math.min(images.length, 9);
         const centerY = state.height * 0.67;
         const cardBaseScale = (0.44 * state.width) / 160;
         const perspective = Math.max(700, state.width * 2.2);
