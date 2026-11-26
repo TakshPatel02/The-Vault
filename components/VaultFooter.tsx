@@ -196,12 +196,22 @@ export function VaultFooter() {
               <br />
               Taste is.
             </p>
-            <a
-              href="mailto:hello@takshpatel.dev"
-              className="mt-2 inline-flex min-h-11 items-center text-[15px] leading-[1.6] text-[#111113] underline decoration-[#77736d]/50 underline-offset-4 transition-opacity hover:opacity-60 sm:mt-4 sm:text-[16px]"
-            >
-              If an image is yours, tell me →
-            </a>
+            <div className="mt-2 flex flex-col items-start sm:mt-4">
+              <a
+                href="mailto:hello@takshpatel.dev"
+                className="inline-flex min-h-11 items-center text-[15px] leading-[1.6] text-[#111113] underline decoration-[#77736d]/50 underline-offset-4 transition-opacity hover:opacity-60 sm:text-[16px]"
+              >
+                If an image is yours, tell me →
+              </a>
+              <a
+                href="https://github.com/TakshPatel02/The-Vault"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center text-[15px] leading-[1.6] text-[#111113] underline decoration-[#77736d]/50 underline-offset-4 transition-opacity hover:opacity-60 sm:text-[16px]"
+              >
+                ★ Star it on GitHub →
+              </a>
+            </div>
             <p className="mt-2 font-mono text-[12px] text-[#77736d] sm:mt-4 sm:text-[13px]">
               Built with Next.js and Framer Motion.
             </p>
