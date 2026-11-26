@@ -52,11 +52,13 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       dragging: false,
       lastX: 0,
       lastTime: 0,
+      isMobile: false,
     };
 
     const measure = () => {
       state.width = root.offsetWidth || 1200;
       state.height = root.offsetHeight || 800;
+      state.isMobile = state.width < 640;
     };
 
     measure();
@@ -68,7 +70,10 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       state.lastX = event.clientX;
       state.lastTime = performance.now();
       state.velocity = 0;
-      root.setPointerCapture?.(event.pointerId);
+      // Only capture on mouse so touch pan-y vertical scroll stays free
+      if (event.pointerType === "mouse") {
+        root.setPointerCapture?.(event.pointerId);
+      }
     };
 
     const onHover = (event: PointerEvent) => {
@@ -97,15 +102,22 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
       state.lastX = event.clientX;
       state.lastTime = now;
 
-      const unit = Math.min(state.width / 1200, state.height / 800) * 1.7;
-      const delta = (dx / unit) * 0.0035;
-      state.userTurn += delta;
-      state.velocity = delta / dt;
+      if (state.isMobile) {
+        // Direct, responsive horizontal swipe sensitivity on narrow viewports
+        const delta = (dx / Math.max(280, state.width)) * 2.4;
+        state.userTurn += delta;
+        state.velocity = delta / dt;
+      } else {
+        const unit = Math.min(state.width / 1200, state.height / 800) * 1.7;
+        const delta = (dx / unit) * 0.0035;
+        state.userTurn += delta;
+        state.velocity = delta / dt;
+      }
     };
 
     const onUp = (event: PointerEvent) => {
       state.dragging = false;
-      if (root.hasPointerCapture?.(event.pointerId)) {
+      if (event.pointerType === "mouse" && root.hasPointerCapture?.(event.pointerId)) {
         root.releasePointerCapture(event.pointerId);
       }
     };
@@ -161,65 +173,129 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
         state.velocity *= damping;
       }
 
-      const hoverLean = state.hover * 0.9;
-      const tilt = (30 + (state.pointerY - 0.5) * 12 * hoverLean) * DEG;
-      const roll = -12 * DEG;
-      const cosPitch = Math.cos(tilt);
-      const sinPitch = Math.sin(tilt);
-      const cosRoll = Math.cos(roll);
-      const sinRoll = Math.sin(roll);
-      const unit = Math.min(state.width / 1200, state.height / 800) * 1.7;
-      const perspective = 1426 * unit;
-      const radius = 285;
+      const mob = state.isMobile;
       const centerX = state.width / 2;
-      const centerY = state.height * 0.42;
-      const phi = entryAngle + state.turn + state.userTurn +
-        (state.pointerX - 0.5) * 12 * DEG * hoverLean;
-      const pitchBase = 22 * DEG;
-      const sinPitchBase = Math.sin(pitchBase);
-      const cosPitchBase = Math.cos(pitchBase);
 
-      if (stageRef.current) {
-        stageRef.current.style.perspective = `${perspective}px`;
-        stageRef.current.style.perspectiveOrigin = `${centerX}px ${centerY}px`;
-      }
+      if (mob) {
+        // ── MOBILE: Sweeping 3D curved horizontal arc in the lower half ──
+        // Avoids cramped circular ring & keeps upper 40% completely clear for headline.
+        const activeCount = Math.min(images.length, 7);
+        const centerY = state.height * 0.67;
+        const cardBaseScale = (0.44 * state.width) / 160;
+        const perspective = Math.max(700, state.width * 2.2);
+        const phi = entryAngle * 0.45 + state.turn + state.userTurn;
 
-      images.forEach((_image, index) => {
-        const card = cardRefs.current[index];
-        if (card) {
-          const [heightJitter, , radiusJitter] = seededJitter(index);
-          const theta = phi + (TAU * index) / images.length;
-          const ringRadius = radius * radiusScale * (1 + (radiusJitter * 6) / 100);
-          const x0 = ringRadius * Math.sin(theta);
-          const z0 = ringRadius * Math.cos(theta);
-          const y0 = heightJitter * 12;
-          const y1 = y0 * cosPitch + z0 * sinPitch;
-          const z1 = Math.min(z0 * cosPitch - y0 * sinPitch, perspective - 50);
-          const x = centerX + (x0 * cosRoll - y1 * sinRoll) * unit;
-          const y = centerY + (x0 * sinRoll + y1 * cosRoll) * unit;
-          const z = z1 * unit;
+        if (stageRef.current) {
+          stageRef.current.style.perspective = `${perspective}px`;
+          stageRef.current.style.perspectiveOrigin = `${centerX}px ${centerY}px`;
+        }
+
+        images.forEach((_image, index) => {
+          const card = cardRefs.current[index];
+          if (!card) return;
+
+          if (index >= activeCount) {
+            card.style.opacity = "0";
+            card.style.pointerEvents = "none";
+            card.style.transform = "translate3d(-9999px, -9999px, 0)";
+            return;
+          }
+
+          const theta = phi + (TAU * index) / activeCount;
+          const sinT = Math.sin(theta);
+          const cosT = Math.cos(theta);
+
+          // Gentle horizontal arc across the screen
+          const x = centerX + sinT * (state.width * 0.44);
+          // Front card sits slightly higher than side cards in a subtle arc
+          const y = centerY + (1 - cosT) * (state.height * 0.032);
+          const z = (cosT - 1) * 110;
+
           let entryScale = 1;
           let entryOpacity = 1;
           if (!reducedMotion) {
-            const cardTime = now - entryStart - entryDelay - index * 120;
-            const cardProgress = Math.min(1, Math.max(0, cardTime / 900));
+            const cardTime = now - entryStart - entryDelay - index * 90;
+            const cardProgress = Math.min(1, Math.max(0, cardTime / 800));
             const cardEase = 1 - Math.pow(1 - cardProgress, 4);
-            entryScale = 0.6 + 0.4 * cardEase;
+            entryScale = 0.78 + 0.22 * cardEase;
             entryOpacity = cardEase;
           }
-          const scale = unit * entryScale;
-          const yaw = 18 * Math.sin(theta);
 
-          card.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) translate(-50%, -50%) rotateY(${yaw.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+          const depthFactor = (cosT + 1) / 2;
+          const scale = cardBaseScale * (0.72 + 0.28 * depthFactor) * entryScale;
+          const yaw = -sinT * 24;
 
-          const yRing = x0 * Math.sin(-12 * DEG) +
-            (y0 * cosPitchBase + z0 * sinPitchBase) * Math.cos(-12 * DEG);
-          card.style.zIndex = String(100000 + Math.round(yRing * 10));
-          const backDepth = Math.min(1, Math.max(0, (-z1 + radius) / (radius * 2)));
-          card.style.opacity = ((1 - backDepth * 0.35) * entryOpacity).toFixed(3);
-          card.style.filter = `blur(${(backDepth * 1.5).toFixed(2)}px)`;
+          // Fade back-half cards smoothly to 0 so they never clutter behind front cards
+          const arcOpacity = Math.min(1, Math.max(0, (cosT + 0.2) / 0.55));
+          const finalOpacity = arcOpacity * entryOpacity;
+          const blur = Math.max(0, (1 - Math.max(0, cosT)) * 2.4);
+
+          card.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) translate(-50%, -50%) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+          card.style.zIndex = String(100000 + Math.round(cosT * 1000));
+          card.style.opacity = finalOpacity.toFixed(3);
+          card.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
+        });
+      } else {
+        // ── DESKTOP: Original 3D tilted halo ring ──
+        const hoverLean = state.hover * 0.9;
+        const tilt = (30 + (state.pointerY - 0.5) * 12 * hoverLean) * DEG;
+        const roll = -12 * DEG;
+        const cosPitch = Math.cos(tilt);
+        const sinPitch = Math.sin(tilt);
+        const cosRoll = Math.cos(roll);
+        const sinRoll = Math.sin(roll);
+        const unit = Math.min(state.width / 1200, state.height / 800) * 1.7;
+        const perspective = 1426 * unit;
+        const radius = 285;
+        const centerY = state.height * 0.42;
+        const phi = entryAngle + state.turn + state.userTurn +
+          (state.pointerX - 0.5) * 12 * DEG * hoverLean;
+        const pitchBase = 22 * DEG;
+        const sinPitchBase = Math.sin(pitchBase);
+        const cosPitchBase = Math.cos(pitchBase);
+
+        if (stageRef.current) {
+          stageRef.current.style.perspective = `${perspective}px`;
+          stageRef.current.style.perspectiveOrigin = `${centerX}px ${centerY}px`;
         }
-      });
+
+        images.forEach((_image, index) => {
+          const card = cardRefs.current[index];
+          if (card) {
+            const [heightJitter, , radiusJitter] = seededJitter(index);
+            const theta = phi + (TAU * index) / images.length;
+            const ringRadius = radius * radiusScale * (1 + (radiusJitter * 6) / 100);
+            const x0 = ringRadius * Math.sin(theta);
+            const z0 = ringRadius * Math.cos(theta);
+            const y0 = heightJitter * 12;
+            const y1 = y0 * cosPitch + z0 * sinPitch;
+            const z1 = Math.min(z0 * cosPitch - y0 * sinPitch, perspective - 50);
+            const x = centerX + (x0 * cosRoll - y1 * sinRoll) * unit;
+            const y = centerY + (x0 * sinRoll + y1 * cosRoll) * unit;
+            const z = z1 * unit;
+            let entryScale = 1;
+            let entryOpacity = 1;
+            if (!reducedMotion) {
+              const cardTime = now - entryStart - entryDelay - index * 120;
+              const cardProgress = Math.min(1, Math.max(0, cardTime / 900));
+              const cardEase = 1 - Math.pow(1 - cardProgress, 4);
+              entryScale = 0.6 + 0.4 * cardEase;
+              entryOpacity = cardEase;
+            }
+            const scale = unit * entryScale;
+            const yaw = 18 * Math.sin(theta);
+
+            card.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) translate(-50%, -50%) rotateY(${yaw.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+
+            const yRing = x0 * Math.sin(-12 * DEG) +
+              (y0 * cosPitchBase + z0 * sinPitchBase) * Math.cos(-12 * DEG);
+            card.style.zIndex = String(100000 + Math.round(yRing * 10));
+            const backDepth = Math.min(1, Math.max(0, (-z1 + radius) / (radius * 2)));
+            card.style.opacity = ((1 - backDepth * 0.35) * entryOpacity).toFixed(3);
+            card.style.filter = `blur(${(backDepth * 1.5).toFixed(2)}px)`;
+          }
+        });
+      }
 
       frameId = requestAnimationFrame(frame);
     };
@@ -252,20 +328,21 @@ export function HaloCardCarousel({ images, onFirstDrag }: HaloCardCarouselProps)
   return (
     <div
       ref={rootRef}
-      className="relative h-full w-full cursor-grab touch-pan-y select-none active:cursor-grabbing"
+      className="relative h-full w-full cursor-grab select-none active:cursor-grabbing"
+      style={{ touchAction: "pan-y" }}
       aria-label="Draggable 3D carousel of The Vault images"
     >
-      <div ref={stageRef} className="absolute inset-0" style={{ perspectiveOrigin: "50% 42%" }}>
+      <div ref={stageRef} className="absolute inset-0">
         {images.map((image, index) => (
           <div
             key={image.src}
             ref={(element) => {
               cardRefs.current[index] = element;
             }}
-            className="absolute left-0 top-0 aspect-video w-40 overflow-hidden rounded-xs bg-bg-secondary"
+            className="absolute left-0 top-0 aspect-video w-40 overflow-hidden rounded-sm bg-bg-secondary"
             style={{
               transform: "translate3d(-9999px, -9999px, 0)",
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.12)",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0,0,0,0.06)",
               willChange: "transform, opacity, filter",
             }}
           >
