@@ -50,6 +50,7 @@ export function VaultStatement() {
   const characters = STATEMENT.split("");
   const characterCount = characters.length;
   const [activeChip, setActiveChip] = useState<ChipKey | null>(null);
+  const [hasTappedChip, setHasTappedChip] = useState(false);
   const previewX = useMotionValue(0);
   const previewY = useMotionValue(0);
   const previewRotate = useMotionValue(0);
@@ -66,95 +67,162 @@ export function VaultStatement() {
     lastPreviewX.current = event.clientX;
   };
 
+  const handleChipTap = (chipKey: ChipKey) => {
+    setHasTappedChip(true);
+    setActiveChip((current) => (current === chipKey ? null : chipKey));
+  };
+
   const focusedWords = activeChip ? CHIPS[activeChip].focusWords : null;
 
   return (
-    <section ref={ref} className="relative h-[150vh] bg-bg-primary text-text-primary">
-      <div className="sticky top-0 flex h-svh items-center justify-center px-8 sm:px-12 lg:px-20">
+    <section
+      ref={ref}
+      className="relative h-[145svh] bg-bg-primary text-text-primary sm:h-[150vh]"
+      onClick={() => {
+        if (activeChip && window.innerWidth < 640) {
+          setActiveChip(null);
+        }
+      }}
+    >
+      <div className="sticky top-0 flex h-svh items-center justify-center px-6 sm:px-12 lg:px-20">
         <p
-          className="mx-auto w-full max-w-350 text-center font-display text-[clamp(36px,3.8vw,60px)] font-medium leading-[1.18] tracking-[-0.03em]"
+          className="mx-auto w-full max-w-350 text-center font-display text-[clamp(26px,6.8vw,38px)] font-medium leading-[1.22] tracking-[-0.03em] sm:text-[clamp(36px,3.8vw,60px)] sm:leading-[1.18]"
           aria-label={STATEMENT}
         >
           {LINE_GROUPS.map((group, groupIndex) => (
-            <span key={groupIndex} className={`block ${groupIndex > 0 ? "mt-11" : ""}`}>
+            <span key={groupIndex} className={`block ${groupIndex > 0 ? "mt-7 sm:mt-11" : ""}`}>
               {group.map((line) => {
                 const lineIndex = LINES.indexOf(line);
                 const lineStart = LINES
                   .slice(0, lineIndex)
                   .reduce((length, previousLine) => length + previousLine.length + 1, 0);
 
-            return (
-              <span key={line} className="block whitespace-normal lg:whitespace-nowrap">
-                {line.split(" ").map((word, wordIndex) => {
-                  const wordsBefore = line
-                    .split(" ")
-                    .slice(0, wordIndex)
-                    .reduce((length, previousWord) => length + previousWord.length + 1, 0);
-                  const wordStart = lineStart + wordsBefore;
-                  const chipEntry = (Object.entries(CHIPS) as [ChipKey, (typeof CHIPS)[ChipKey]][])
-                    .find(([, item]) => item.afterWord === word);
-                  const chipKey = chipEntry?.[0];
-                  const chip = chipEntry?.[1];
-                  const dimmed = focusedWords !== null &&
-                    !Array.from(focusedWords).includes(word);
-                  const emphasized = lineIndex === LINES.length - 1 && wordIndex >= 4;
+                return (
+                  <span key={line} className="block whitespace-normal lg:whitespace-nowrap">
+                    {line.split(" ").map((word, wordIndex) => {
+                      const wordsBefore = line
+                        .split(" ")
+                        .slice(0, wordIndex)
+                        .reduce((length, previousWord) => length + previousWord.length + 1, 0);
+                      const wordStart = lineStart + wordsBefore;
+                      const chipEntry = (Object.entries(CHIPS) as [ChipKey, (typeof CHIPS)[ChipKey]][])
+                        .find(([, item]) => item.afterWord === word);
+                      const chipKey = chipEntry?.[0];
+                      const chip = chipEntry?.[1];
+                      const dimmed = focusedWords !== null &&
+                        !Array.from(focusedWords).includes(word);
+                      const emphasized = lineIndex === LINES.length - 1 && wordIndex >= 4;
 
-                  return (
-                    <span key={`${word}-${wordIndex}`}>
-                      <span className={`inline-flex whitespace-nowrap ${emphasized ? "font-serif italic" : ""}`}>
-                        {word.split("").map((character, characterIndex) => {
-                          const absoluteIndex = wordStart + characterIndex;
-                          const start = absoluteIndex / characterCount;
-                          const end = (absoluteIndex + 1) / characterCount;
+                      return (
+                        <span key={`${word}-${wordIndex}`}>
+                          <span className={`inline-flex whitespace-nowrap ${emphasized ? "font-serif italic" : ""}`}>
+                            {word.split("").map((character, characterIndex) => {
+                              const absoluteIndex = wordStart + characterIndex;
+                              const start = absoluteIndex / characterCount;
+                              const end = (absoluteIndex + 1) / characterCount;
 
-                          return (
-                            <StatementCharacter
-                              key={`${wordIndex}-${characterIndex}`}
+                              return (
+                                <StatementCharacter
+                                  key={`${wordIndex}-${characterIndex}`}
+                                  progress={scrollYProgress}
+                                  range={[start, end]}
+                                  dimmed={dimmed}
+                                >
+                                  {character}
+                                </StatementCharacter>
+                              );
+                            })}
+                          </span>
+                          {chip && (
+                            <StatementChip
+                              src={chip.src}
+                              alt={chip.alt}
                               progress={scrollYProgress}
-                              range={[start, end]}
-                              dimmed={dimmed}
-                            >
-                              {character}
-                            </StatementCharacter>
-                          );
-                        })}
-                      </span>
-                      {chip && (
-                        <StatementChip
-                          src={chip.src}
-                          alt={chip.alt}
-                          progress={scrollYProgress}
-                          chipKey={chipKey}
-                          activeChip={activeChip}
-                          onPreviewEnter={(event) => {
-                            if (!chipKey) return;
-                            setActiveChip(chipKey);
-                            handlePreviewMove(event);
-                          }}
-                          onPreviewMove={handlePreviewMove}
-                          onPreviewLeave={() => setActiveChip(null)}
-                          range={[
-                            wordStart / characterCount,
-                            (wordStart + word.length) / characterCount,
-                          ]}
-                        />
-                      )}
-                      {!chip && " "}
-                    </span>
-                  );
-                })}
-              </span>
-            );
+                              chipKey={chipKey}
+                              activeChip={activeChip}
+                              onPreviewEnter={(event) => {
+                                if (window.innerWidth < 640 || !chipKey) return;
+                                setActiveChip(chipKey);
+                                handlePreviewMove(event);
+                              }}
+                              onPreviewMove={(event) => {
+                                if (window.innerWidth < 640) return;
+                                handlePreviewMove(event);
+                              }}
+                              onPreviewLeave={() => {
+                                if (window.innerWidth < 640) return;
+                                setActiveChip(null);
+                              }}
+                              onTap={(event) => {
+                                if (window.innerWidth >= 640 || !chipKey) return;
+                                event.stopPropagation();
+                                handleChipTap(chipKey);
+                              }}
+                              range={[
+                                wordStart / characterCount,
+                                (wordStart + word.length) / characterCount,
+                              ]}
+                            />
+                          )}
+                          {!chip && " "}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
               })}
             </span>
           ))}
         </p>
+
+        {/* Mobile subtle tap hint */}
+        <p
+          className={`pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#77736d] transition-opacity duration-300 sm:hidden ${
+            hasTappedChip || activeChip ? "opacity-0" : "opacity-100"
+          }`}
+          aria-hidden={hasTappedChip || Boolean(activeChip)}
+        >
+          Tap any frame
+        </p>
+
+        {/* Mobile centered editorial preview card */}
+        <AnimatePresence>
+          {activeChip && (
+            <motion.div
+              key={`mobile-${activeChip}`}
+              className="pointer-events-auto absolute bottom-8 left-1/2 z-500000 w-[78vw] max-w-[320px] -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-surface-elevated p-1.5 shadow-[0_24px_60px_rgba(17,17,17,0.2)] sm:hidden"
+              initial={{ opacity: 0, y: 18, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.94 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => {
+                event.stopPropagation();
+                setActiveChip(null);
+              }}
+            >
+              <div className="aspect-video w-full overflow-hidden rounded-lg bg-bg-secondary">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={CHIPS[activeChip].src}
+                  alt={CHIPS[activeChip].alt}
+                  draggable={false}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex items-center justify-between px-2 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#77736d]">
+                <span>{CHIPS[activeChip].alt}</span>
+                <span>Tap to close</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
+      {/* Desktop cursor-following preview card */}
       <AnimatePresence>
         {activeChip && (
           <motion.div
-            className="pointer-events-none fixed left-0 top-0 z-500000 aspect-video w-[clamp(250px,28vw,400px)] overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-[0_30px_80px_rgba(17,17,17,0.18)]"
+            className="pointer-events-none fixed left-0 top-0 z-500000 hidden aspect-video w-[clamp(250px,28vw,400px)] overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-[0_30px_80px_rgba(17,17,17,0.18)] sm:block"
             style={{
               x: previewSpringX,
               y: previewSpringY,
@@ -213,6 +281,7 @@ function StatementChip({
   onPreviewEnter,
   onPreviewMove,
   onPreviewLeave,
+  onTap,
   range,
 }: {
   src: string;
@@ -223,25 +292,33 @@ function StatementChip({
   onPreviewEnter: (event: React.MouseEvent<HTMLSpanElement>) => void;
   onPreviewMove: (event: React.MouseEvent) => void;
   onPreviewLeave: () => void;
+  onTap: (event: React.MouseEvent<HTMLSpanElement>) => void;
   range: [number, number];
 }) {
   const width = useTransform(progress, range, ["0em", "2.8em"]);
+  const isActive = activeChip === chipKey;
 
   return (
     <motion.span
-      className="mx-[0.14em] inline-block h-[0.84em] align-middle overflow-hidden rounded-full bg-bg-secondary"
+      className={`mx-[0.14em] inline-block h-[0.84em] cursor-pointer align-middle overflow-hidden rounded-full bg-bg-secondary transition-shadow duration-200 ${
+        isActive ? "ring-1 ring-text-primary/40" : ""
+      }`}
       style={{ width }}
+      whileTap={{ scale: 0.94 }}
       onMouseEnter={onPreviewEnter}
       onMouseMove={onPreviewMove}
       onMouseLeave={onPreviewLeave}
+      onClick={onTap}
       aria-label={alt}
+      role="button"
+      tabIndex={0}
     >
       <motion.img
         src={src}
         alt=""
         draggable={false}
         className="h-full w-full object-cover"
-        animate={{ scale: activeChip === chipKey ? 1.12 : 1 }}
+        animate={{ scale: isActive ? 1.12 : 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       />
     </motion.span>
