@@ -8,11 +8,11 @@ const footerLinks = {
     { label: "Portfolio", href: "https://takshpatel.vercel.app" },
     { label: "GitHub", href: "https://github.com/TakshPatel02" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/takshpatel02" },
-    { label: "Blog", href: null },
+    { label: "Blog", href: "https://takshpatel02.hashnode.dev" },
   ],
   work: [
-    { label: "Mokuso", href: null },
-    { label: "Shipyard", href: null },
+    { label: "Mokuso", href: "https://mokuso-teal.vercel.app/" },
+    { label: "Shipyard", href: "https://shipyard-fm.vercel.app/" },
     { label: "Koe", href: null },
     { label: "Kura", href: null },
   ],
@@ -198,7 +198,7 @@ export function VaultFooter() {
             </p>
             <div className="mt-2 flex flex-col items-start sm:mt-4">
               <a
-                href="mailto:hello@takshpatel.dev"
+                href="mailto:takshpatel022@gmail.com"
                 className="inline-flex min-h-11 items-center text-[15px] leading-[1.6] text-[#111113] underline decoration-[#77736d]/50 underline-offset-4 transition-opacity hover:opacity-60 sm:text-[16px]"
               >
                 If an image is yours, tell me →
